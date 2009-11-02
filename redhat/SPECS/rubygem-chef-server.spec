@@ -6,13 +6,21 @@
 
 Summary: A systems integration framework
 Name: rubygem-%{gemname}
-Version: 0.7.10
-Release: 1%{?dist}
+Version: 0.7.14
+Release: 2%{?dist}
 Group: Development/Languages
-License: Apache 
+License: Apache
 URL: http://wiki.opscode.com/display/chef
 Source0: %{gemname}-%{version}.gem
+Source1: indexer.rb
+Source2: server.rb
+Source3: chef-indexer.1
+Source4: chef-server.1
+Source5: chef-indexer.init
+Source6: chef-server.init
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Requires(post): /sbin/chkconfig
+Requires(preun): /sbin/service, /sbin/chkconfig
 Requires: couchdb >= 0.9.0
 Requires: rubygems
 Requires: rubygem(stomp) >= 0
@@ -37,6 +45,7 @@ Provides: rubygem(%{gemname}) = %{version}
 A systems integration framework, built to bring the benefits of configuration
 management to your entire infrastructure.
 
+
 %prep
 
 %build
@@ -50,11 +59,32 @@ mkdir -p %{buildroot}/%{_bindir}
 mv %{buildroot}%{gemdir}/bin/* %{buildroot}/%{_bindir}
 rmdir %{buildroot}%{gemdir}/bin
 find %{buildroot}%{geminstdir}/bin -type f | xargs chmod a+x
-install -Dp -m0644 %SOURCE2 %{buildroot}%{_sysconfdir}/chef/indexer.rb
-install -Dp -m0644 %SOURCE2 %{buildroot}%{_sysconfdir}/chef/server.rb
+
+install -Dp -m0644 %{SOURCE1} %{buildroot}%{_sysconfdir}/chef/indexer.rb
+install -Dp -m0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/chef/server.rb
+
+mkdir -p %{buildroot}%{_mandir}/man1
+install -Dp -m0644 %{SOURCE3} %{buildroot}%{_mandir}/man1/chef-indexer.1
+install -Dp -m0644 %{SOURCE4} %{buildroot}%{_mandir}/man1/chef-server.1
+
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d
+install -p -m 755 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/chef-indexer
+install -p -m 755 %{SOURCE6} $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/chef-server
 
 %clean
 rm -rf %{buildroot}
+
+%post
+/sbin/chkconfig --add chef-indexer
+/sbin/chkconfig --add chef-server
+
+%preun
+if [ $1 -eq 0 ]; then
+  /sbin/service chef-server stop > /dev/null 2>&1 || :
+  /sbin/chkconfig --del chef-server
+  /sbin/service chef-indexer stop > /dev/null 2>&1 || :
+  /sbin/chkconfig --del chef-indexer
+fi
 
 %files
 %defattr(-, root, root, -)
@@ -66,26 +96,22 @@ rm -rf %{buildroot}
 %doc %{geminstdir}/LICENSE
 %{gemdir}/cache/%{gemname}-%{version}.gem
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
-
-# mkdir -p /var/run/chef
-# mkdir -p /var/cache/chef
-# mkdir -p /var/log/chef
-# mkdir -p /var/lib/chef
-# mkdir -p /srv/chef
-
-%post
-/sbin/chkconfig --add chef-indexer
-/sbin/chkconfig --add chef-server
-
-%preun
-if [ $1 = 0 ]; then
-  /sbin/service chef-server stop > /dev/null 2>&1
-  /sbin/chkconfig --del chef-server
-  /sbin/service chef-indexer stop > /dev/null 2>&1
-  /sbin/chkconfig --del chef-indexer
-fi
+%config(noreplace) %{_sysconfdir}/chef/indexer.rb
+%config(noreplace) %{_sysconfdir}/chef/server.rb
+%{_sysconfdir}/rc.d/init.d/chef-indexer
+%{_sysconfdir}/rc.d/init.d/chef-server
+%{_mandir}/man1/chef-indexer.1.gz
+%{_mandir}/man1/chef-server.1.gz
 
 %changelog
+* Fri Oct 30 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-2
+- Package working versions of init scripts.
+- Move directory setup to rubygem-chef
+
+* Thu Oct 29 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-1
+- New upstream version. Thanks to Thom May and Joshua Timberman for the bits and
+  pieces of this new version.
+
 * Sat Sep 19 2009 Joshua Timberman <joshua@opscode.com> - 0.7.10-2
 - Add couchdb to dependencies.
 - Add chef-server-slice to dependencies.

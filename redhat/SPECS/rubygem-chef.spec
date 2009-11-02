@@ -1,14 +1,3 @@
-# thank you mandriva! 
-# http://wiki.mandriva.com/en/Rpmbuild_and_git#The_git_Way
-#%define chef_apply_git_patch_series \
-#  for patch in $(awk '/^Patch.*:/ { print "%{_sourcedir}/"$2 }' %{_specdir}/%{name}.spec); \
-#  do \
-#    if [ -s $patch ]; then \
-#      git-apply --exclude="spec/*" --whitespace=nowarn $patch; \
-#    fi \
-#  done
-#BuildRequires: git
-
 # Generated from chef-0.6.2.gem by gem2rpm -*- rpm-spec -*-
 %define ruby_sitelib %(ruby -rrbconfig -e "puts Config::CONFIG['sitelibdir']")
 %define gemdir %(ruby -rubygems -e 'puts Gem::dir' 2>/dev/null)
@@ -17,15 +6,23 @@
 
 Summary: A systems integration framework
 Name: rubygem-%{gemname}
-Version: 0.7.10
-Release: 1%{?dist}
+Version: 0.7.14
+Release: 2%{?dist}
 Group: Development/Languages
 License: Apache 
 URL: http://wiki.opscode.com/display/chef
 Source0: %{gemname}-%{version}.gem
+Source1: client.rb
+Source2: solo.rb
+Source3: chef-client.8
+Source4: chef-solo.8
+Source5: chef-client.init
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Requires(post): /sbin/chkconfig
+Requires(preun): /sbin/service, /sbin/chkconfig
 Requires: rubygems
 Requires: rubygem(mixlib-config) >= 1.0.12
+Requires: rubygem(ohai) >= 0.3.6
 Requires: rubygem(mixlib-cli) >= 0
 Requires: rubygem(mixlib-log) >= 0
 Requires: rubygem(ruby-openid) >= 0
@@ -37,12 +34,6 @@ Requires: rubygem(ohai) >= 0
 BuildRequires: rubygems
 BuildArch: noarch
 Provides: rubygem(%{gemname}) = %{version}
-
-# Series of patches carried in git @ http://github.com/mdkent/chef/tree/0.7.10-el5
-#
-# Currently generated from within the chef/ subdirectory via:
-# git-format-patch --relative --suffix=".chef.patch" 0.7.10
-#Patch0001: 
 
 %description
 A systems integration framework, built to bring the benefits of configuration
@@ -63,13 +54,29 @@ mv %{buildroot}%{gemdir}/bin/* %{buildroot}/%{_bindir}
 rmdir %{buildroot}%{gemdir}/bin
 find %{buildroot}%{geminstdir}/bin -type f | xargs chmod a+x
 
-# can't apply normal patches to gems
-#pushd %{buildroot}%{geminstdir}
-#  %chef_apply_git_patch_series
-#popd
+install -Dp -m0644 %{SOURCE1} %{buildroot}%{_sysconfdir}/chef/client.rb
+install -Dp -m0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/chef/solo.rb
+
+mkdir -p %{buildroot}%{_mandir}/man8
+install -Dp -m0644 %{SOURCE3} %{buildroot}%{_mandir}/man8/chef-client.8
+install -Dp -m0644 %{SOURCE4} %{buildroot}%{_mandir}/man8/chef-solo.8
+
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d
+install -p -m 755 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/chef-client
+
+mkdir -p %{buildroot}/var/{log/chef,lib/chef,run/chef,cache/chef}
 
 %clean
 rm -rf %{buildroot}
+
+%post
+/sbin/chkconfig --add chef-client
+
+%preun
+if [ $1 -eq 0 ]; then
+  /sbin/service chef-client stop > /dev/null 2>&1 || :
+  /sbin/chkconfig --del chef-client
+fi
 
 %files
 %defattr(-, root, root, -)
@@ -81,9 +88,24 @@ rm -rf %{buildroot}
 %doc %{geminstdir}/LICENSE
 %{gemdir}/cache/%{gemname}-%{version}.gem
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
+%config(noreplace) %{_sysconfdir}/chef/client.rb
+%config(noreplace) %{_sysconfdir}/chef/solo.rb
+%{_sysconfdir}/rc.d/init.d/chef-client
+%{_mandir}/man8/chef-client.8.gz
+%{_mandir}/man8/chef-solo.8.gz
+%dir /var/lib/chef
+%dir /var/log/chef
+%dir /var/cache/chef
+%dir /var/run/chef
 
 
 %changelog
+* Fri Oct 30 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-2
+- Package init scripts and man pages.
+
+* Thu Oct 29 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-1
+- New upstream version.
+
 * Thu Sep 17 2009 Matthew Kent <matt@bravenet.com> - 0.7.10-1
 - New upstream version.
 - Drop patch series.

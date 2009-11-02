@@ -6,7 +6,7 @@
 
 Summary: Ohai profiles your system and emits JSON
 Name: rubygem-%{gemname}
-Version: 0.3.0
+Version: 0.3.6
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
@@ -16,6 +16,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: rubygems
 Requires: rubygem(json) >= 0
 Requires: rubygem(extlib) >= 0
+Requires: rubygem(systemu) >= 0
+Requires: rubygem(mixlib-cli) >= 0
+Requires: rubygem(mixlib-config) >= 0
+Requires: rubygem(mixlib-log) >= 0
 BuildRequires: rubygems
 BuildArch: noarch
 Provides: rubygem(%{gemname}) = %{version}
@@ -51,6 +55,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Oct 29 2009 Matthew Kent <matt@bravenet.com> - 0.3.6-1
+- New upstream version
+
 * Sun Jun 21 2009 Matthew Kent <matt@bravenet.com> - 0.3.0-1
 - New upstream version, drop all patches.
 

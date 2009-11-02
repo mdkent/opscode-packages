@@ -11,7 +11,7 @@
 . /etc/init.d/functions
 
 prog="chef-indexer"
-pidfile=/var/run/chef/chef-client.pid
+pidfile=/var/run/chef/indexer.pid
 lockfile=/var/lock/subsys/$prog
 config=/etc/chef/indexer.rb
 user="root"
