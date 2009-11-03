@@ -4,10 +4,13 @@
 %define gemname chef-server
 %define geminstdir %{gemdir}/gems/%{gemname}-%{version}
 
+%define chef_user chef
+%define chef_group chef
+
 Summary: A systems integration framework
 Name: rubygem-%{gemname}
 Version: 0.7.14
-Release: 3%{?dist}
+Release: 4%{?dist}
 Group: Development/Languages
 License: Apache
 URL: http://wiki.opscode.com/display/chef
@@ -114,13 +117,16 @@ fi
 %config(noreplace) %{_sysconfdir}/sysconfig/chef-indexer
 %config(noreplace) %{_sysconfdir}/sysconfig/chef-server
 %dir %{_sysconfdir}/chef/certificates
-%dir %{_localstatedir}/lib/chef/cookbooks
-%dir %{_localstatedir}/lib/chef/openid
-%dir %{_localstatedir}/lib/chef/openid/cstore
-%dir %{_localstatedir}/lib/chef/openid/store
-%dir %{_localstatedir}/lib/chef/search_index
+%attr(-, %{chef_user}, %{chef_group}) %dir %{_localstatedir}/lib/chef/cookbooks
+%attr(-, %{chef_user}, %{chef_group}) %dir %{_localstatedir}/lib/chef/openid
+%attr(-, %{chef_user}, %{chef_group}) %dir %{_localstatedir}/lib/chef/openid/cstore
+%attr(-, %{chef_user}, %{chef_group}) %dir %{_localstatedir}/lib/chef/openid/store
+%attr(-, %{chef_user}, %{chef_group}) %dir %{_localstatedir}/lib/chef/search_index
 
 %changelog
+* Tue Nov 03 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-4
+- Fix chef dir ownership.
+
 * Mon Nov 02 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-3
 - Include logrotate configs.
 - Improve init scripts with sysconfig control.

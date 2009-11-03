@@ -7,7 +7,7 @@
 Summary: A systems integration framework
 Name: rubygem-%{gemname}
 Version: 0.7.14
-Release: 3%{?dist}
+Release: 4%{?dist}
 Group: Development/Languages
 License: Apache
 URL: http://wiki.opscode.com/display/chef
@@ -58,6 +58,9 @@ rm -rf %{buildroot}
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
 
 %changelog
+* Tue Nov 03 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-4
+- Version match chef rpm.
+
 * Mon Nov 02 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-3
 - Version match chef rpm.
 

@@ -4,10 +4,13 @@
 %define gemname chef
 %define geminstdir %{gemdir}/gems/%{gemname}-%{version}
 
+%define chef_user chef
+%define chef_group chef
+
 Summary: A systems integration framework
 Name: rubygem-%{gemname}
 Version: 0.7.14
-Release: 3%{?dist}
+Release: 4%{?dist}
 Group: Development/Languages
 License: Apache
 URL: http://wiki.opscode.com/display/chef
@@ -22,6 +25,7 @@ Source7: chef-client.sysconf
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): /sbin/chkconfig
 Requires(preun): /sbin/service, /sbin/chkconfig
+Requires(pre): shadow-utils
 Requires: rubygems
 Requires: rubygem(mixlib-config) >= 1.0.12
 Requires: rubygem(ohai) >= 0.3.6
@@ -77,6 +81,14 @@ if [ $1 -eq 0 ]; then
   /sbin/chkconfig --del chef-client
 fi
 
+%pre
+# as per https://fedoraproject.org/wiki/Packaging:UsersAndGroups
+getent group %{chef_group} >/dev/null || groupadd -r %{chef_group}
+getent passwd %{chef_user} >/dev/null || \
+useradd -r -g %{chef_group} -d %{_localstatedir}/lib/chef -s /sbin/nologin \
+  -c "Chef user" %{chef_user}
+exit 0
+
 %files
 %defattr(-, root, root, -)
 %{_bindir}/chef-client
@@ -94,12 +106,16 @@ fi
 %{_initrddir}/chef-client
 %config(noreplace) %{_sysconfdir}/logrotate.d/chef-client
 %config(noreplace) %{_sysconfdir}/sysconfig/chef-client
-%dir %{_localstatedir}/lib/chef
-%dir %{_localstatedir}/log/chef
-%dir %{_localstatedir}/cache/chef
-%dir %{_localstatedir}/run/chef
+%attr(-, %{chef_user}, %{chef_group}) %dir %{_localstatedir}/log/chef
+%attr(-, %{chef_user}, %{chef_group}) %dir %{_localstatedir}/cache/chef
+%attr(-, %{chef_user}, %{chef_group}) %dir %{_localstatedir}/run/chef
+%attr(-, %{chef_user}, %{chef_group}) %dir %{_localstatedir}/lib/chef
 
 %changelog
+* Tue Nov 03 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-4
+- Create proper non root user.
+- Fix chef dir ownership.
+
 * Mon Nov 02 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-3
 - Include logrotate configs.
 - Improve init scripts with sysconfig control.
