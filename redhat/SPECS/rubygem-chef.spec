@@ -7,9 +7,9 @@
 Summary: A systems integration framework
 Name: rubygem-%{gemname}
 Version: 0.7.14
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: Development/Languages
-License: Apache 
+License: Apache
 URL: http://wiki.opscode.com/display/chef
 Source0: %{gemname}-%{version}.gem
 Source1: client.rb
@@ -17,6 +17,8 @@ Source2: solo.rb
 Source3: chef-client.8
 Source4: chef-solo.8
 Source5: chef-client.init
+Source6: chef-client.logrotate
+Source7: chef-client.sysconf
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): /sbin/chkconfig
 Requires(preun): /sbin/service, /sbin/chkconfig
@@ -39,7 +41,6 @@ Provides: rubygem(%{gemname}) = %{version}
 A systems integration framework, built to bring the benefits of configuration
 management to your entire infrastructure.
 
-
 %prep
 
 %build
@@ -56,15 +57,13 @@ find %{buildroot}%{geminstdir}/bin -type f | xargs chmod a+x
 
 install -Dp -m0644 %{SOURCE1} %{buildroot}%{_sysconfdir}/chef/client.rb
 install -Dp -m0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/chef/solo.rb
-
-mkdir -p %{buildroot}%{_mandir}/man8
 install -Dp -m0644 %{SOURCE3} %{buildroot}%{_mandir}/man8/chef-client.8
 install -Dp -m0644 %{SOURCE4} %{buildroot}%{_mandir}/man8/chef-solo.8
+install -Dp -m0755 %{SOURCE5} %{buildroot}%{_initrddir}/chef-client
+install -Dp -m0644 %{SOURCE6} %{buildroot}%{_sysconfdir}/logrotate.d/chef-client
+install -Dp -m0644 %{SOURCE7} %{buildroot}%{_sysconfdir}/sysconfig/chef-client
 
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d
-install -p -m 755 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/chef-client
-
-mkdir -p %{buildroot}/var/{log/chef,lib/chef,run/chef,cache/chef}
+mkdir -p %{buildroot}%{_localstatedir}/{log/chef,lib/chef,run/chef,cache/chef}
 
 %clean
 rm -rf %{buildroot}
@@ -90,16 +89,22 @@ fi
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
 %config(noreplace) %{_sysconfdir}/chef/client.rb
 %config(noreplace) %{_sysconfdir}/chef/solo.rb
-%{_sysconfdir}/rc.d/init.d/chef-client
 %{_mandir}/man8/chef-client.8.gz
 %{_mandir}/man8/chef-solo.8.gz
-%dir /var/lib/chef
-%dir /var/log/chef
-%dir /var/cache/chef
-%dir /var/run/chef
-
+%{_initrddir}/chef-client
+%config(noreplace) %{_sysconfdir}/logrotate.d/chef-client
+%config(noreplace) %{_sysconfdir}/sysconfig/chef-client
+%dir %{_localstatedir}/lib/chef
+%dir %{_localstatedir}/log/chef
+%dir %{_localstatedir}/cache/chef
+%dir %{_localstatedir}/run/chef
 
 %changelog
+* Mon Nov 02 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-3
+- Include logrotate configs.
+- Improve init scripts with sysconfig control.
+- Log to STDOUT by default.
+
 * Fri Oct 30 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-2
 - Package init scripts and man pages.
 

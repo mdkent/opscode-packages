@@ -1,0 +1,10 @@
+/var/log/chef/client.log {
+  rotate 12
+  weekly
+  compress
+  missingok
+  notifempty
+  postrotate
+    /etc/init.d/chef-client condrestart
+  endscript
+}

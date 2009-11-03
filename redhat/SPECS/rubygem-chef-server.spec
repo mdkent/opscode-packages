@@ -7,7 +7,7 @@
 Summary: A systems integration framework
 Name: rubygem-%{gemname}
 Version: 0.7.14
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: Development/Languages
 License: Apache
 URL: http://wiki.opscode.com/display/chef
@@ -18,6 +18,10 @@ Source3: chef-indexer.1
 Source4: chef-server.1
 Source5: chef-indexer.init
 Source6: chef-server.init
+Source7: chef-indexer.logrotate
+Source8: chef-server.logrotate
+Source9: chef-indexer.sysconf
+Source10: chef-server.sysconf
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): /sbin/chkconfig
 Requires(preun): /sbin/service, /sbin/chkconfig
@@ -45,7 +49,6 @@ Provides: rubygem(%{gemname}) = %{version}
 A systems integration framework, built to bring the benefits of configuration
 management to your entire infrastructure.
 
-
 %prep
 
 %build
@@ -62,14 +65,18 @@ find %{buildroot}%{geminstdir}/bin -type f | xargs chmod a+x
 
 install -Dp -m0644 %{SOURCE1} %{buildroot}%{_sysconfdir}/chef/indexer.rb
 install -Dp -m0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/chef/server.rb
-
-mkdir -p %{buildroot}%{_mandir}/man1
 install -Dp -m0644 %{SOURCE3} %{buildroot}%{_mandir}/man1/chef-indexer.1
 install -Dp -m0644 %{SOURCE4} %{buildroot}%{_mandir}/man1/chef-server.1
+install -Dp -m0755 %{SOURCE5} %{buildroot}%{_initrddir}/chef-indexer
+install -Dp -m0755 %{SOURCE6} %{buildroot}%{_initrddir}/chef-server
+install -Dp -m0644 %{SOURCE7} %{buildroot}%{_sysconfdir}/logrotate.d/chef-indexer
+install -Dp -m0644 %{SOURCE8} %{buildroot}%{_sysconfdir}/logrotate.d/chef-server
+install -Dp -m0644 %{SOURCE9} %{buildroot}%{_sysconfdir}/sysconfig/chef-indexer
+install -Dp -m0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/sysconfig/chef-server
 
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d
-install -p -m 755 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/chef-indexer
-install -p -m 755 %{SOURCE6} $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/chef-server
+mkdir -p %{buildroot}%{_sysconfdir}/chef/certificates
+mkdir -p %{buildroot}%{_localstatedir}/lib/chef/{cookbooks,openid,openid/cstore,openid/store,search_index}
+
 
 %clean
 rm -rf %{buildroot}
@@ -98,12 +105,27 @@ fi
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
 %config(noreplace) %{_sysconfdir}/chef/indexer.rb
 %config(noreplace) %{_sysconfdir}/chef/server.rb
-%{_sysconfdir}/rc.d/init.d/chef-indexer
-%{_sysconfdir}/rc.d/init.d/chef-server
 %{_mandir}/man1/chef-indexer.1.gz
 %{_mandir}/man1/chef-server.1.gz
+%{_initrddir}/chef-indexer
+%{_initrddir}/chef-server
+%config(noreplace) %{_sysconfdir}/logrotate.d/chef-indexer
+%config(noreplace) %{_sysconfdir}/logrotate.d/chef-server
+%config(noreplace) %{_sysconfdir}/sysconfig/chef-indexer
+%config(noreplace) %{_sysconfdir}/sysconfig/chef-server
+%dir %{_sysconfdir}/chef/certificates
+%dir %{_localstatedir}/lib/chef/cookbooks
+%dir %{_localstatedir}/lib/chef/openid
+%dir %{_localstatedir}/lib/chef/openid/cstore
+%dir %{_localstatedir}/lib/chef/openid/store
+%dir %{_localstatedir}/lib/chef/search_index
 
 %changelog
+* Mon Nov 02 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-3
+- Include logrotate configs.
+- Improve init scripts with sysconfig control.
+- Add missing directories.
+
 * Fri Oct 30 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-2
 - Package working versions of init scripts.
 - Move directory setup to rubygem-chef
