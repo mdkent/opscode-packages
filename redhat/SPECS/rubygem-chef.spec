@@ -10,7 +10,7 @@
 Summary: A systems integration framework
 Name: rubygem-%{gemname}
 Version: 0.7.14
-Release: 4%{?dist}
+Release: 5%{?dist}
 Group: Development/Languages
 License: Apache
 URL: http://wiki.opscode.com/display/chef
@@ -112,6 +112,10 @@ exit 0
 %attr(-, %{chef_user}, %{chef_group}) %dir %{_localstatedir}/lib/chef
 
 %changelog
+* Wed Nov 04 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-5
+- Fix init scripts to ensure all output during start/stop heads to /dev/null,
+  was hanging chef-solo.
+
 * Tue Nov 03 2009 Matthew Kent <matt@bravenet.com> - 0.7.14-4
 - Create proper non root user.
 - Fix chef dir ownership.
