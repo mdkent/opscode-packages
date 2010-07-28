@@ -21,7 +21,7 @@ BuildRequires: git
 Summary: Manages search indexes of Chef node attributes using SOLR
 Name: rubygem-%{gemname}
 Version: 0.9.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 Group: Development/Languages
 License: ASL 2.0
 URL: http://wiki.opscode.com/display/chef
@@ -37,9 +37,7 @@ Source8: chef-solr.sysconf
 Source9: chef-solr-indexer.sysconf
 Source10: solr.rb
 Source11: solr-indexer.rb
-%if 0%{?rhel}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 Requires: ruby >= 1.8.6
 Requires: ruby(rubygems)
 Requires: ruby(abi) = %{rubyabi}
@@ -75,7 +73,7 @@ Group: System Environment/Base
 
 Requires: %{name} = %{version}-%{release}
 Requires: rabbitmq-server
-Requires: java-1.6.0-openjdk
+Requires: java >= 1:1.6.0
 Requires: chef-common
 Requires(pre): shadow-utils
 Requires(post): chkconfig
@@ -229,6 +227,10 @@ exit 0
 %attr(-,%{chef_user},root) %{_localstatedir}/lib/chef/solr
 
 %changelog
+* Wed Jul 28 2010 Matthew Kent <mkent@magoazul.com> - 0.9.6-2
+- Drop conditional macro in spec
+- Change java dep to java >= 1:1.6.0 as per Fedora guidelines (CHEF-1437)
+
 * Sun Jul 18 2010 Matthew Kent <mkent@magoazul.com> - 0.9.6-1
 - New upstream version.
 

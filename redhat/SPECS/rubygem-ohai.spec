@@ -8,14 +8,12 @@
 Summary: Profiles your system and emits JSON
 Name: rubygem-%{gemname}
 Version: 0.5.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 Group: Development/Languages
 License: ASL 2.0 
 URL: http://wiki.opscode.com/display/ohai
 Source0: http://gems.rubyforge.org/gems/%{gemname}-%{version}.gem
-%if 0%{?rhel}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 Requires: ruby(rubygems) >= 1.3.5
 Requires: ruby(abi) = %{rubyabi}
 Requires: rubygem(json)
@@ -108,6 +106,9 @@ rake spec || :
 %{gemdir}/doc/%{gemname}-%{version}
 
 %changelog
+* Wed Jul 28 2010 Matthew Kent <mkent@magoazul.com> - 0.5.6-2
+- Drop conditional macro in spec
+
 * Sun Jul 18 2010 Matthew Kent <mkent@magoazul.com> - 0.5.6-1
 - New upstream version.
 

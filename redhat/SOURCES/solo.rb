@@ -33,13 +33,18 @@ log_location       STDOUT
 
 file_cache_path    "/var/cache/chef"
 
+# file_backup_path specifies where chef will store backups of replaced files
+# from template, cookbook_file and remote_file resources.
+
+file_backup_path   "/var/lib/chef/backup"
+
 # cookbook_path specifies where solo should look for cookbooks it will use.
 # valid value is a string, or array of strings of filesystem directory locations.
 # This setting is similar to the server setting of the same name. Solo will use
 # this as a search location, in Array order. It should be a subdirectory of
 # file_cache_path, above.
 
-cookbook_path      [ "/var/lib/chef/cookbooks" ]
+cookbook_path      [ "/var/lib/chef/cookbooks", "/var/lib/chef/site-cookbooks" ]
 
 # role_path designates where the server should load role JSON and Ruby DSL
 # files from.

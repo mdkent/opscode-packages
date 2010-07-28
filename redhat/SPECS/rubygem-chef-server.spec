@@ -8,14 +8,12 @@
 Summary: Merb application providing centralized management for Chef
 Name: rubygem-%{gemname}
 Version: 0.9.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 Group: Development/Languages
 License: ASL 2.0
 URL: http://wiki.opscode.com/display/chef
 Source0: http://gems.rubyforge.org/gems/%{gemname}-%{version}.gem
-%if 0%{?rhel}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 Requires: ruby >= 1.8.6
 Requires: ruby(rubygems)
 Requires: ruby(abi) = %{rubyabi}
@@ -92,6 +90,9 @@ rm -rf %{buildroot}
 %files -n chef-server
 
 %changelog
+* Wed Jul 28 2010 Matthew Kent <mkent@magoazul.com> - 0.9.6-2
+- Drop conditional macro in spec
+
 * Sun Jul 18 2010 Matthew Kent <mkent@magoazul.com> - 0.9.6-1
 - New upstream version.
 - We become a meta package to install the required chef server components.

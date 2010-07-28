@@ -8,7 +8,7 @@
 Summary: Merb app slice providing Web interface to API server for Chef
 Name: rubygem-%{gemname}
 Version: 0.9.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 Group: Development/Languages
 License: ASL 2.0
 URL: http://wiki.opscode.com/display/chef
@@ -21,9 +21,7 @@ Source2: chef-server-webui.logrotate
 Source3: chef-server-webui.init
 Source4: chef-server-webui.sysconf
 Source5: webui.rb
-%if 0%{?rhel}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 Requires: ruby >= 1.8.6
 Requires: ruby(rubygems)
 Requires: ruby(abi) = %{rubyabi}
@@ -167,6 +165,9 @@ fi
 %config(noreplace) %{_sysconfdir}/chef/webui.rb
 
 %changelog
+* Wed Jul 28 2010 Matthew Kent <mkent@magoazul.com> - 0.9.6-2
+- Drop conditional macro in spec
+
 * Sun Jul 18 2010 Matthew Kent <mkent@magoazul.com> - 0.9.6-1
 - New upstream version.
 - webui package broken out from chef-server.

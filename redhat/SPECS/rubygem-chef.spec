@@ -11,7 +11,7 @@
 Summary: Client libraries for the Chef systems integration framework
 Name: rubygem-%{gemname}
 Version: 0.9.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: Development/Languages
 License: ASL 2.0
 URL: http://wiki.opscode.com/display/chef
@@ -32,9 +32,7 @@ Source7: client.rb
 Source8: solo.rb
 Source9: chef-client.sysconf
 Source10: chef-create-amqp_passwd
-%if 0%{?rhel}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 Requires: ruby >= 1.8.6
 Requires: ruby(rubygems)
 Requires: ruby(abi) = %{rubyabi}
@@ -149,7 +147,7 @@ install -Dp -m0644 \
 install -Dp -m0644 \
   %{SOURCE9} %{buildroot}%{_sysconfdir}/sysconfig/chef-client
 
-mkdir -p %{buildroot}%{_localstatedir}/{log/chef,run/chef,cache/chef}
+mkdir -p %{buildroot}%{_localstatedir}/{log/chef,lib/chef,run/chef,cache/chef}
 
 install -Dp -m0755 \
   %{SOURCE10} %{buildroot}%{_sbindir}/chef-create-amqp_passwd
@@ -210,11 +208,17 @@ exit 0
 %attr(-,%{chef_user},root) %dir %{_localstatedir}/log/chef
 %attr(-,%{chef_user},root) %dir %{_localstatedir}/cache/chef
 %attr(-,%{chef_user},root) %dir %{_localstatedir}/run/chef
+%attr(-,%{chef_user},root) %dir %{_localstatedir}/lib/chef
 
 %files -n chef-common
 %{_sbindir}/chef-create-amqp_passwd
 
 %changelog
+* Wed Jul 28 2010 Matthew Kent <mkent@magoazul.com> - 0.9.6-3
+- Create lib/chef for chef-solo
+- Drop conditional macro in spec
+- Update solo.rb to search site-cookbooks and specify file_backup_path
+
 * Wed Jul 21 2010 Matthew Kent <mkent@magoazul.com> - 0.9.6-2
 - Updated client config.
 
